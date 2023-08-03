@@ -1,0 +1,9 @@
+BTCV_chckpoints
+ACDC_UNet_chckpoints
+data
+runs
+train_edsr_btcv.py
+train_res_SR_SEG_net_btcv.py
+BTCV_seg_single_branch_chckpoints
+BTCV_res_sr_seg_chckpoints
+preprocess/test.py

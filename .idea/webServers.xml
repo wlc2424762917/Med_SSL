@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="dbaadb3d-5084-4145-84b9-7cbbd5517e33" name="Yanglab8">
+        <fileTransfer rootFolder="/home/lichao" accessType="SFTP" host="10.147.20.175" port="22" sshConfigId="5ef033ce-c8ee-4769-9bb7-41d65526b2ed" sshConfig="lichao@10.147.20.175:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="8ada9c7a-9ebd-46fa-b844-ace6b57d78c8" name="Yanglab7(项目级别)">
+        <fileTransfer rootFolder="/home/lichao" accessType="SFTP" host="10.147.20.154" port="22" sshConfigId="d691ec7d-26aa-4ae2-95c5-d68cfb1f779a" sshConfig="lichao@10.147.20.154:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
