@@ -274,7 +274,7 @@ def get_loader(args):
             Resized(
                 keys=["image"],
                 spatial_size=[224, 224, -1],
-                mode='nearest'
+                mode='trilinear'
             ),
             RandFlipd(
                 keys=["image"],
@@ -304,17 +304,37 @@ def get_loader(args):
             LoadImaged(keys=["image"], ensure_channel_first=True),
             ScaleIntensityRanged(
                 keys=["image"],
-                a_min=args.a_min,
-                a_max=args.a_max,
-                b_min=args.b_min,
-                b_max=args.b_max,
+                a_min=0,
+                a_max=255,
+                b_min=0.0,
+                b_max=1.0,
                 clip=True,
             ),
             Resized(
                 keys=["image"],
-                spatial_size=[args.in_shape_x, args.in_shape_y],
-                mode='bilinear'
-            )
+                spatial_size=[224, 224, -1],
+                mode='trilinear'
+            ),
+            RandFlipd(
+                keys=["image"],
+                spatial_axis=[0],
+                prob=0.10,
+            ),
+            RandFlipd(
+                keys=["image"],
+                spatial_axis=[1],
+                prob=0.10,
+            ),
+            RandRotate90d(
+                keys=["image"],
+                prob=0.10,
+                max_k=3,
+            ),
+            RandShiftIntensityd(
+                keys=["image"],
+                offsets=0.10,
+                prob=0.50,
+            ),
         ]
     )
 
@@ -359,7 +379,7 @@ def get_loader(args):
             sampler=train_sampler,
             pin_memory=True,
         )
-        val_ds = data.Dataset(data=validation_files, transform=val_transform)
+        val_ds = Dataset(data=validation_files, transform=val_transform)
         val_sampler = Sampler(val_ds, shuffle=False) if args.distributed else None
         val_loader = data.DataLoader(
             val_ds, batch_size=1, shuffle=False, num_workers=args.workers, sampler=val_sampler, pin_memory=True

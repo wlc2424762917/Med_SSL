@@ -91,12 +91,10 @@ def val_epoch(model, loader, epoch, args, model_inferer=None):
                 if model_inferer is not None:
                     logits = model_inferer(data, mask_data)
                 else:
-                    logits = model(data)
+                    logits = model(data, mask_data)
             if not logits.is_cuda:
                 target = target.cpu()
-
-            mean_logits = torch.mean(logits, dim=1)
-
+            mean_logits = torch.mean(logits)
             acc = mean_logits.cuda(args.rank)
 
             if args.distributed:
@@ -107,15 +105,15 @@ def val_epoch(model, loader, epoch, args, model_inferer=None):
                 run_acc += acc/len(loader)
 
             if args.rank == 0:
-                avg_acc = np.mean(run_acc.avg)
+                avg_acc = np.mean(run_acc)
                 print(
                     "Val {}/{} {}/{}".format(epoch, args.max_epochs, idx, len(loader)),
                     "acc",
-                    avg_acc,
+                    acc/len(loader),
                     "time {:.2f}s".format(time.time() - start_time),
                 )
             start_time = time.time()
-    return run_acc
+    return avg_acc
 
 
 def save_checkpoint(model, epoch, args, filename="model.pt", best_acc=0, optimizer=None, scheduler=None):
@@ -148,7 +146,7 @@ def run_training(
     scaler = None
     if args.amp:
         scaler = GradScaler()
-    val_acc_max = 0.0
+    val_acc_min = 100.0
     for epoch in range(start_epoch, args.max_epochs):
         if args.distributed:
             train_loader.sampler.set_epoch(epoch)
@@ -189,16 +187,16 @@ def run_training(
                 )
                 if writer is not None:
                     writer.add_scalar("val_acc", val_avg_acc, epoch)
-                if val_avg_acc > val_acc_max:
-                    print("new best ({:.6f} --> {:.6f}). ".format(val_acc_max, val_avg_acc))
-                    val_acc_max = val_avg_acc
+                if val_avg_acc < val_acc_min:
+                    print("new best ({:.6f} --> {:.6f}). ".format(val_acc_min, val_avg_acc))
+                    val_acc_min = val_avg_acc
                     b_new_best = True
                     if args.rank == 0 and args.logdir is not None and args.save_checkpoint:
                         save_checkpoint(
-                            model, epoch, args, best_acc=val_acc_max, optimizer=optimizer, scheduler=scheduler
+                            model, epoch, args, best_acc=val_acc_min, optimizer=optimizer, scheduler=scheduler
                         )
             if args.rank == 0 and args.logdir is not None and args.save_checkpoint:
-                save_checkpoint(model, epoch, args, best_acc=val_acc_max, filename="model_final.pt")
+                save_checkpoint(model, epoch, args, best_acc=val_acc_min, filename="model_final.pt")
                 if b_new_best:
                     print("Copying to model.pt new best model!!!!")
                     shutil.copyfile(os.path.join(args.logdir, "model_final.pt"), os.path.join(args.logdir, "model.pt"))
@@ -206,6 +204,6 @@ def run_training(
         if scheduler is not None:
             scheduler.step()
 
-    print("Training Finished !, Best Accuracy: ", val_acc_max)
+    print("Training Finished !, Best Accuracy: ", val_acc_min)
 
-    return val_acc_max
+    return val_acc_min

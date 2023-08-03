@@ -173,7 +173,7 @@ def main():
             Resized(
                 keys=["image"],
                 spatial_size=[224, 224, -1],
-                mode='nearest'
+                mode='trilinear'
             ),
             Resized(
                 keys=["label"],
@@ -228,7 +228,7 @@ def main():
         ]
     )
 
-    data_dir = "./data/acdc/"
+    data_dir = "./data/synapse/"
     split_json = "dataset.json"
 
     datasets = data_dir + split_json
@@ -238,13 +238,13 @@ def main():
         data=datalist,
         transform=train_transforms,
     )
-    train_loader = ThreadDataLoader(train_ds, num_workers=0, batch_size=4, shuffle=True)
+    train_loader = ThreadDataLoader(train_ds, num_workers=0, batch_size=24, shuffle=True)
     # val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_num=6, cache_rate=1.0, num_workers=4)
     # val_loader = ThreadDataLoader(val_ds, num_workers=0, batch_size=1)
 
     for img_data, mask in train_loader:
         import matplotlib.pyplot as plot
-        print(mask)
+        print(mask.shape)
         print(img_data['image'].shape)
         plot.imshow(img_data['image'].detach().cpu().numpy()[0,0,:,:,0])
         plt.show()

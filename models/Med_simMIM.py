@@ -30,10 +30,10 @@ class SwinTransformerForSimMIM(SwinTransformer):
         B, L, _ = x.shape
 
         mask_tokens = self.mask_token.expand(B, L, -1)
-        print(x.shape)
-        print(mask_tokens.shape)
+        # print(x.shape)
+        # print(mask_tokens.shape)
         w = mask.flatten(1).unsqueeze(-1).type_as(mask_tokens)
-        print(w.shape)
+        # print(w.shape)
         x = x * (1. - w) + mask_tokens * w
 
         Wh, Ww = int((x.size(1))**0.5), int((x.size(1))**0.5)
@@ -56,7 +56,7 @@ class SwinTransformerForSimMIM(SwinTransformer):
                 x_out = norm_layer(x_out)
                 out = x_out.view(-1, H, W, self.num_features[i]).permute(0, 3, 1, 2).contiguous()
 
-        print("out", out.shape)
+        # print("out", out.shape)
         return out
 
     @torch.jit.ignore
